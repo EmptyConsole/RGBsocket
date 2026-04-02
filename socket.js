@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const { start } = require("repl");
 const { Server } = require("socket.io");
 
 const app = express();
@@ -37,6 +38,11 @@ const callbacks = {
   onMessage: (socket, room, data) => {},
   onDisconnect: (socket) => {},
 };
+
+function startTimer(duration) {
+  const endTime = Date.now() + duration;
+  io.to(roomId).emit("timerStart", Date.now() + 10000);
+}
 
 // =========================
 // SOCKET SETUP
@@ -127,7 +133,9 @@ io.on("connection", (socket) => {
     socket.to(roomName).emit("user_joined", socket.id);
 
     io.emit("rooms_list", rooms);
-
+    // setTimeout(() => {
+    startTimer(30000); // Start a 30-second timer when a user joins a room
+    // }, 3000);
     callbacks.onJoin(socket, roomName);
   }
 
