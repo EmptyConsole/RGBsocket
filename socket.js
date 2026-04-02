@@ -43,7 +43,7 @@ function tick(roomName){
   if(!rooms[roomName]){
 return;
   }
-  if(rooms[roomName].time%=rooms[roomName].roundTime==0){
+  if(rooms[roomName].time%rooms[roomName].roundTime==0){
 rooms[roomName].time=0;
 rooms[roomName].rgb=randomRGB();
   }
