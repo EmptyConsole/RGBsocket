@@ -129,11 +129,11 @@ io.on("connection", (socket) => {
     // leave ALL rooms this socket joined
     for (const roomName in rooms) {
       if (rooms[roomName].clients[socket.id]) {
-        leaveRoom(socket, roomName);
+       // leaveRoom(socket, roomName);
       }
     }
 
-    callbacks.onDisconnect(socket);
+   // callbacks.onDisconnect(socket);
   });
 
   // =========================
