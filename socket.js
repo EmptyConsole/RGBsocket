@@ -48,7 +48,7 @@ rooms[roomName].time=0;
 rooms[roomName].rgb=randomRGB();
   }
   rooms[roomName].time+=100;
-socket.to(roomName).emit("recieveData", {
+io.to(roomName).emit("recieveData", {
       time:rooms[roomName].time,
       players:rooms[roomName].clients,
       rgb:rooms[roomName].rgb
@@ -129,11 +129,11 @@ io.on("connection", (socket) => {
     // leave ALL rooms this socket joined
     for (const roomName in rooms) {
       if (rooms[roomName].clients[socket.id]) {
-       // leaveRoom(socket, roomName);
+       leaveRoom(socket, roomName);
       }
     }
 
-   // callbacks.onDisconnect(socket);
+   callbacks.onDisconnect(socket);
   });
 
   // =========================
