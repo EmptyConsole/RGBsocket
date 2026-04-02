@@ -148,7 +148,7 @@ io.on("connection", (socket) => {
     rooms[roomName].clients[socket.id] = {username: user, score: 0, sub: false};
 
     socket.emit("joined_room", roomName);
-    socket.to(roomName).emit("user_joined", socket.id);
+   // socket.to(roomName).emit("user_joined", socket.id);
 
     io.emit("rooms_list", rooms);
     callbacks.onJoin(socket, roomName);
@@ -161,7 +161,7 @@ io.on("connection", (socket) => {
     socket.leave(roomName);
     delete rooms[roomName].clients[socket.id];
 
-    socket.to(roomName).emit("user_left", socket.id);
+    //socket.to(roomName).emit("user_left", socket.id);
 
     // delete empty room
     if (Object.keys(rooms[roomName].clients).length === 0) {
