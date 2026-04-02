@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 // ROOM STORE
 // =========================
 const rooms = Object.create(null);
+const roomTickers = Object.create(null);
 // rooms = {
 //   roomName: { clients: { socketId: true } }
 // }
@@ -78,7 +79,13 @@ io.on("connection", (socket) => {
     if (!isValidRoomName(roomName)) return;
 
     if (!rooms[roomName]) {
-      rooms[roomName] = { clients: {}, ticker: setInterval(tick,100,roomName),time: 0, rgb: {r: 0, g: 0, b:0},roundTime: 5000};
+      rooms[roomName] = { 
+        clients: {}, 
+        time: 0, 
+        rgb: {r: 0, g: 0, b:0},
+        roundTime: 5000
+      };
+      roomTickers[roomName] = setInterval(tick,100,roomName);
       callbacks.onRoomCreate(roomName);
     }
 
@@ -165,9 +172,13 @@ io.on("connection", (socket) => {
 
     // delete empty room
     if (Object.keys(rooms[roomName].clients).length === 0) {
-      delete rooms[roomName];
-      callbacks.onRoomDelete(roomName);
-    }
+  delete rooms[roomName];
+
+  clearInterval(roomTickers[roomName]);
+  delete roomTickers[roomName];
+
+  callbacks.onRoomDelete(roomName);
+}
 
     io.emit("rooms_list", rooms);
 
