@@ -39,11 +39,29 @@ const callbacks = {
   onDisconnect: (socket) => {},
 };
 
-function startTimer(duration) {
-  const endTime = Date.now() + duration;
-  io.to(roomId).emit("timerStart", Date.now() + 10000);
+function tick(roomName){
+  if(!rooms[roomName]){
+return;
+  }
+  if(rooms[roomName].time%=rooms[roomName].roundTime==0){
+rooms[roomName].time=0;
+rooms[roomName].rgb=randomRGB();
+  }
+  rooms[roomName].time+=100;
+socket.to(roomName).emit("recieveData", {
+      time:rooms[roomName].time,
+      players:rooms[roomName].clients,
+      rgb:rooms[roomName].rgb
+    });
+    
 }
-
+function randomRGB() {
+  return {
+    r: Math.floor(Math.random() * 256),
+    g: Math.floor(Math.random() * 256),
+    b: Math.floor(Math.random() * 256)
+  };
+}
 // =========================
 // SOCKET SETUP
 // =========================
@@ -60,7 +78,7 @@ io.on("connection", (socket) => {
     if (!isValidRoomName(roomName)) return;
 
     if (!rooms[roomName]) {
-      rooms[roomName] = { clients: {} };
+      rooms[roomName] = { clients: {}, ticker: setInterval(tick,100,roomName),time: 0, rgb: {r: 0, g: 0, b:0},roundTime: 5000};
       callbacks.onRoomCreate(roomName);
     }
 
@@ -70,11 +88,11 @@ io.on("connection", (socket) => {
   // -----------------------
   // JOIN ROOM
   // -----------------------
-  socket.on("join_room", (roomName) => {
+  socket.on("join_room", (roomName,user) => {
     if (!isValidRoomName(roomName)) return;
     if (!rooms[roomName]) return;
 
-    joinRoom(socket, roomName);
+    joinRoom(socket, roomName,user);
   });
 
   // -----------------------
@@ -122,20 +140,17 @@ io.on("connection", (socket) => {
   // HELPERS
   // =========================
 
-  function joinRoom(socket, roomName) {
+  function joinRoom(socket, roomName, user) {
     // prevent duplicate joins
     if (rooms[roomName].clients[socket.id]) return;
 
     socket.join(roomName);
-    rooms[roomName].clients[socket.id] = true;
+    rooms[roomName].clients[socket.id] = {username: user, score: 0, sub: false};
 
     socket.emit("joined_room", roomName);
     socket.to(roomName).emit("user_joined", socket.id);
 
     io.emit("rooms_list", rooms);
-    // setTimeout(() => {
-    startTimer(30000); // Start a 30-second timer when a user joins a room
-    // }, 3000);
     callbacks.onJoin(socket, roomName);
   }
 
